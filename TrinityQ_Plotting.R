@@ -1,3 +1,4 @@
+library(ggplot2)
 library(lubridate)
 MakeYMDinHYDF <- function(inHYDF, hydYear){
   lenDF <- dim(inHYDF)[1]
@@ -120,5 +121,33 @@ GetIndexFromDate <- function(inHY,inDate){
   }
   return(as.integer(out)+1)
 }
+
+plotHydrograph_HYYear <- function(inHYDF){
+  if(!("CFS" %in% colnames(inHYDF))){inHYDF$CFS <- inHYDF$Q}
+  if(!("YMD" %in% colnames(inHYDF))){inHYDF$YMD <- inHYDF$Date}
+  if(!("HY" %in% colnames(inHYDF))){inHYDF$HY <- as.factor(year(inHYDF$Date)[300])}
+  HY = as.factor(1)
+  g2 <- ggplot(inHYDF, aes(YMD, CFS, color = HY))+
+    geom_line() +
+    ylab("Streamflow (CFS)") +
+    scale_color_manual(values = c("red", "black")) +
+    theme_bw() +
+    theme(legend.position = c(0.8, 0.8))
+  g2}
+
+
+GetHydroDF<- function(dateStart, dateEnd){
+  histQ %>%
+    filter(YMD < dateEnd + 1) %>%
+    filter(YMD > dateStart - 1) -> outDF
+  return(outDF)
+}
+
+
+#plotHydrograph(testROD)
+
+
+
+
 
 

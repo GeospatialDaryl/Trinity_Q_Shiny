@@ -46,17 +46,23 @@ library(lubridate)
 ui <- fluidPage(
    
    # Application title
-   titlePanel("Old Faithful Geyser Data"),
+   titlePanel("Trinity River Q"),
    
    # Sidebar with a slider input for number of bins 
    sidebarLayout(
       sidebarPanel(
-         sliderInput("bins",
-                     "Number of bins:",
-                     min = 1,
-                     max = 50,
-                     value = 30)
+         sliderInput("start",
+                     "Hydrologic Year:",
+                     min = 1912,
+                     max = 2018,
+                     value = 106)#,
+         #sliderInput("end",
+        #             "Hydrologic Year:",
+        #             min = 1913,
+        #             max = 2018,
+        #             value = 105)
       ),
+      
       
       # Show a plot of the generated distribution
       mainPanel(
@@ -67,14 +73,27 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-   
+  #output$distPlot <- renderPlot({
+    # generate bins based on input$bins from ui.R
+  #  x    <- faithful[, 2] 
+  #  bins <- seq(min(x), max(x), length.out = input$bins + 1)
+    
+    # draw the histogram with the specified number of bins
+  #  hist(x, breaks = bins, col = 'darkgray', border = 'white')
+  #}) 
+  
    output$distPlot <- renderPlot({
       # generate bins based on input$bins from ui.R
-      x    <- faithful[, 2] 
-      bins <- seq(min(x), max(x), length.out = input$bins + 1)
+      #x    <- faithful[, 2] 
+      startDate <- ymd(paste(input$start,"-10-01"))
+      #endDate <- ymd(paste(input$end,"-10-01"))
+      #bins <- seq(min(x), max(x), length.out = input$bins + 1)
+      strDate <- as.Date(startDate)
+      inDF <- GetHydroDF(startDate, startDate + 365)
+      plotHydrograph_HYYear(inDF)
       
       # draw the histogram with the specified number of bins
-      hist(x, breaks = bins, col = 'darkgray', border = 'white')
+      #hist(x, breaks = bins, col = 'darkgray', border = 'white')
    })
 }
 
