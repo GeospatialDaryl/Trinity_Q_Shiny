@@ -127,7 +127,7 @@ plotHydrograph_HYYear <- function(inHYDF){
   if(!("YMD" %in% colnames(inHYDF))){inHYDF$YMD <- inHYDF$Date}
   #if(!("HY" %in% colnames(inHYDF))){inHYDF$HY <- as.factor(year(inHYDF$Date)[300])}
   #HY = as.factor(1)
-  g2 <- ggplot(inHYDF, aes(YMD, CFS, color = "blue"))+
+  g2 <- ggplot(inHYDF, aes(YMD, Q))+
     geom_line() +
     ylab("Streamflow (CFS)") +
     scale_color_manual(values = c("red", "black")) +
@@ -137,7 +137,7 @@ plotHydrograph_HYYear <- function(inHYDF){
 
 
 GetHydroDF<- function(dateStart, dateEnd){
-  histQ %>%
+  allQ %>%
     filter(YMD < dateEnd + 1) %>%
     filter(YMD > dateStart - 1) -> outDF
   return(outDF)
