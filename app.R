@@ -52,15 +52,22 @@ ui <- fluidPage(
    sidebarLayout(
       sidebarPanel(
          sliderInput("start",
-                     "Hydrologic Year:",
-                     min = 1912,
-                     max = 2018,
-                     value = 106)#,
-         #sliderInput("end",
-        #             "Hydrologic Year:",
-        #             min = 1913,
-        #             max = 2018,
-        #             value = 105)
+                     "Start Date:",
+                     min = ymd("1911-10-01"),
+                     max = ymd("2018-09-29"),
+                     value = as.Date("2010-09-30"),
+                     timeFormat = "%F"),
+        sliderInput("end",
+                     "End Date:",
+                     min = ymd("1911-10-02"),
+                     max = ymd("2018-09-30"),
+                     value = as.Date("2011-10-01"),
+                     timeFormat = "%F"),
+        sliderInput("singleHY",
+                    "Hydrologic Year:",
+                    min = 1912,
+                    max = 2018,
+                    value = 1920)
       ),
       
       
@@ -73,25 +80,21 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-  #output$distPlot <- renderPlot({
-    # generate bins based on input$bins from ui.R
-  #  x    <- faithful[, 2] 
-  #  bins <- seq(min(x), max(x), length.out = input$bins + 1)
-    
-    # draw the histogram with the specified number of bins
-  #  hist(x, breaks = bins, col = 'darkgray', border = 'white')
-  #}) 
-  
+
    output$distPlot <- renderPlot({
       # generate bins based on input$bins from ui.R
       #x    <- faithful[, 2] 
-      startDate <- ymd(paste(input$start,"-10-01"))
+      #startDate <- ymd(paste(input$start,"-10-01"))
       #endDate <- ymd(paste(input$end,"-10-01"))
       #bins <- seq(min(x), max(x), length.out = input$bins + 1)
-      strDate <- as.Date(startDate)
-      inDF <- GetHydroDF(startDate, startDate + 365)
-      plotHydrograph_HYYear(inDF)
-      
+      #strDate <- input$start
+      startDate <- as.integer(input$singleHY)
+      startDate <- ymd(p(as.character(startDate),"-10-01"))
+      #endDate <- ymd(p(as.character(startDate+1),"-10-01"))
+      endDate <- startDate + years(1)
+      inDF <- GetHydroDF(startDate, endDate)
+      plotH <- plotHydrograph_HYYear(inDF)
+      plot(plotH)
       # draw the histogram with the specified number of bins
       #hist(x, breaks = bins, col = 'darkgray', border = 'white')
    })
