@@ -51,23 +51,21 @@ ui <- fluidPage(
    # Sidebar with a slider input for number of bins 
    sidebarLayout(
       sidebarPanel(
-         sliderInput("start",
-                     "Start Date:",
-                     min = ymd("1911-10-01"),
-                     max = ymd("2018-09-29"),
-                     value = as.Date("2010-09-30"),
-                     timeFormat = "%F"),
-        sliderInput("end",
-                     "End Date:",
-                     min = ymd("1911-10-02"),
-                     max = ymd("2018-09-30"),
-                     value = as.Date("2011-10-01"),
-                     timeFormat = "%F"),
+        dateRangeInput("daterangeIn", "Date range:",
+                       start  = "2001-01-01",
+                       end    = "2010-12-31",
+                       min    = allQ.StartDate,
+                       max    = allQ.EndDate,
+                       format = "mm/dd/yy",
+                       separator = " - "),
         sliderInput("singleHY",
                     "Hydrologic Year:",
                     min = 1912,
                     max = 2018,
-                    value = 1920)
+                    value = 1920,
+                    sep = ""),
+        checkboxInput("showCenterofMass", "Display Center of Mass", FALSE)    #,
+        #verbatimTextOutput("value")
       ),
       
       
