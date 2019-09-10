@@ -129,9 +129,10 @@ plotHydrograph_HYYear <- function(inHYDF){
   #HY = as.factor(1)
   g2 <- ggplot(inHYDF, aes(YMD, Q))+
     geom_line() +
+    #scale_x_date() +
     ylab("Streamflow (CFS)") +
     scale_color_manual(values = c("red", "black")) +
-    theme_bw() +
+    #theme_bw() +
     theme(legend.position = c(0.8, 0.8))
   return(g2)}
 

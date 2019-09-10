@@ -64,7 +64,7 @@ ui <- fluidPage(
                     max = 2018,
                     value = 1920,
                     sep = ""),
-        checkboxInput("showCenterofMass", "Display Center of Mass", FALSE)    #,
+        checkboxInput("ShowCenterofMass", "Display Center of Mass", FALSE)    #,
         #verbatimTextOutput("value")
       ),
       
@@ -92,6 +92,13 @@ server <- function(input, output) {
       endDate <- startDate + years(1)
       inDF <- GetHydroDF(startDate, endDate)
       plotH <- plotHydrograph_HYYear(inDF)
+      if( input$ShowCenterofMass ){
+        centerDate <- CalculateCenterofMass(inDF)
+        plotH <- plotH + geom_vline(xintercept = as.double(centerDate),
+                                    linetype = "dashed",
+                                    color = "red"
+                                    )
+      }
       plot(plotH)
       # draw the histogram with the specified number of bins
       #hist(x, breaks = bins, col = 'darkgray', border = 'white')
