@@ -58,6 +58,7 @@ ui <- fluidPage(
                        max    = allQ.EndDate,
                        format = "mm/dd/yy",
                        separator = " - "),
+        actionButton("renderDateRange", "Plot Range"),
         sliderInput("singleHY",
                     "Hydrologic Year:",
                     min = 1912,
@@ -78,7 +79,12 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-
+  #output$distPlot <- renderPlot({
+  #  input$renderDateRange
+  #  startDate <- input$daterangeIn[1]
+  #  endDate <- input$daterangeIn[2]
+  #    inDF <- GetHydroDF(startDate, endDate)
+  
    output$distPlot <- renderPlot({
       # generate bins based on input$bins from ui.R
       #x    <- faithful[, 2] 
@@ -86,6 +92,8 @@ server <- function(input, output) {
       #endDate <- ymd(paste(input$end,"-10-01"))
       #bins <- seq(min(x), max(x), length.out = input$bins + 1)
       #strDate <- input$start
+     
+     
       startDate <- as.integer(input$singleHY)
       startDate <- ymd(p(as.character(startDate),"-10-01"))
       #endDate <- ymd(p(as.character(startDate+1),"-10-01"))
