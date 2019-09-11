@@ -123,13 +123,13 @@ GetIndexFromDate <- function(inHY,inDate){
 }
 
 plotHydrograph_HYYear <- function(inHYDF){
-  if(!("CFS" %in% colnames(inHYDF))){inHYDF$CFS <- inHYDF$Q}
-  if(!("YMD" %in% colnames(inHYDF))){inHYDF$YMD <- inHYDF$Date}
+  #if(!("CFS" %in% colnames(inHYDF))){inHYDF$CFS <- inHYDF$Q}
+  #if(!("YMD" %in% colnames(inHYDF))){inHYDF$YMD <- inHYDF$Date}
   #if(!("HY" %in% colnames(inHYDF))){inHYDF$HY <- as.factor(year(inHYDF$Date)[300])}
   #HY = as.factor(1)
-  g2 <- ggplot(inHYDF, aes(YMD, Q))+
+  g2 <- ggplot(inHYDF, aes(inHYDF$YMD, inHYDF$Q))+
     geom_line() +
-    #scale_x_date() +
+    xlab("Date") +
     ylab("Streamflow (CFS)") +
     scale_color_manual(values = c("red", "black")) +
     #theme_bw() +
@@ -138,9 +138,10 @@ plotHydrograph_HYYear <- function(inHYDF){
 
 
 GetHydroDF<- function(dateStart, dateEnd){
-  allQ %>%
-    filter(YMD < dateEnd + 1) %>%
-    filter(YMD > dateStart - 1) -> outDF
+  #print(names(allQ))
+  #allQ %>%
+    dplyr::filter(tAllQ, YMD < dateEnd + 1) -> in1
+    dplyr::filter(in1,YMD > dateStart - 1) -> outDF
   return(outDF)
 }
 

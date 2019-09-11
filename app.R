@@ -44,40 +44,70 @@ library(lubridate)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-   
-   # Application title
-   titlePanel("Trinity River Q"),
-   
-   # Sidebar with a slider input for number of bins 
-   sidebarLayout(
-      sidebarPanel(
-        dateRangeInput("daterangeIn", "Date range:",
-                       start  = "2001-01-01",
-                       end    = "2010-12-31",
-                       min    = allQ.StartDate,
-                       max    = allQ.EndDate,
-                       format = "mm/dd/yy",
-                       separator = " - "),
-        actionButton("renderDateRange", "Plot Range"),
-        sliderInput("singleHY",
-                    "Hydrologic Year:",
-                    min = 1912,
-                    max = 2018,
-                    value = 1920,
-                    sep = ""),
-        checkboxInput("ShowCenterofMass", "Display Center of Mass", FALSE)    #,
-        #verbatimTextOutput("value")
-      ),
-      
-      
-      # Show a plot of the generated distribution
-      mainPanel(
-         plotOutput("distPlot")
-      )
-   )
+  
+  # Application title
+  titlePanel("Trinity River Q"),
+  
+  # Sidebar with a slider input for number of bins 
+  sidebarLayout(
+    sidebarPanel(
+      dateRangeInput("daterangeIn", "Date range:",
+                     start  = "2001-01-01",
+                     end    = "2010-12-31",
+                     min    = allQ.StartDate,
+                     max    = allQ.EndDate,
+                     format = "mm/dd/yy",
+                     separator = " - "),
+      actionButton("renderDateRange", "Plot Range"),
+      sliderInput("singleHY",
+                  "Hydrologic Year:",
+                  min = 1912,
+                  max = 2018,
+                  value = 1920,
+                  sep = ""),
+      checkboxInput("ShowCenterofMass", "Display Center of Mass", FALSE) ,
+      checkboxInput("ShowBaseflow", "Display Baseflow", FALSE)    #,
+      #verbatimTextOutput("value")
+    ),
+    
+    
+    # Show a plot of the generated distribution
+    mainPanel(
+      plotOutput("distPlot")
+    )
+  )
 )
 
+# Define server logic required to draw a histogram
+server <- function(input, output) {
+
+  output$distPlot <- renderPlot({
+
+    startDate <- as.integer(input$singleHY)
+    startDate <- ymd(p(as.character(startDate),"-10-01"))
+    #endDate <- ymd(p(as.character(startDate+1),"-10-01"))
+    endDate <- startDate + years(1)
+    inDF <- GetHydroDF(startDate, endDate)
+    plotH <- plotHydrograph_HYYear(inDF)
+    if( input$ShowCenterofMass ){
+      centerDate <- CalculateCenterofMass(inDF)
+      plotH <- plotH + geom_vline(xintercept = as.double(centerDate),
+                                  linetype = "dashed",
+                                  color = "red"
+      )
+    }
+    if( input$ShowBaseflow ){
+      plotH <- plotH + geom_line(aes(x=YMD, y=baseQ),
+                                 xintercept = as.double(centerDate),
+                                 linetype = "dashed",
+                                 color = "blue"
+      )
+    }
+    plot(plotH)
+    # draw the histogram with the specified number of bins
+    #hist(x, breaks = bins, col = 'darkgray', border = 'white')
+  })
+}
 
 # Run the application 
 shinyApp(ui = ui, server = server)
-

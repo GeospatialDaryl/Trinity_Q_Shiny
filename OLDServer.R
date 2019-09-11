@@ -7,23 +7,25 @@ server <- function(input, output) {
   #    inDF <- GetHydroDF(startDate, endDate)
   
   output$distPlot <- renderPlot({
-    # generate bins based on input$bins from ui.R
-    #x    <- faithful[, 2] 
-    #startDate <- ymd(paste(input$start,"-10-01"))
-    #endDate <- ymd(paste(input$end,"-10-01"))
-    #bins <- seq(min(x), max(x), length.out = input$bins + 1)
-    #strDate <- input$start
     
     
     startDate <- as.integer(input$singleHY)
     startDate <- ymd(p(as.character(startDate),"-10-01"))
-    #endDate <- ymd(p(as.character(startDate+1),"-10-01"))
+
     endDate <- startDate + years(1)
+    
     inDF <- GetHydroDF(startDate, endDate)
     plotH <- plotHydrograph_HYYear(inDF)
     if( input$ShowCenterofMass ){
       centerDate <- CalculateCenterofMass(inDF)
       plotH <- plotH + geom_vline(xintercept = as.double(centerDate),
+                                  linetype = "dashed",
+                                  color = "blue"
+      )
+    }
+    if( input$ShowBaseflow ){
+      plotH <- plotH + geom_line(data = tAllQ,
+                                 aes(x = tAllQ$YMD, y = tAllQ$baseQ),
                                   linetype = "dashed",
                                   color = "red"
       )
