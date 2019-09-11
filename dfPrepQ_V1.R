@@ -1,6 +1,17 @@
 load("Z:\\Programs\\SHC\\2_Projects\\085_TrinityRiverDischarge\\06_Trinity_Q\\histQ.RData")
 histQ[,c(1,2,3,4,5,6,8)] -> histQ
 
+
+
+
+
+
+
+
+
+
+
+
 i = 1
 startDate = tbl
 filter(allQ, (YMD>=ymd("1911-10-01") & YMD <=ymd("1912-09-30"))) -> HY1912
