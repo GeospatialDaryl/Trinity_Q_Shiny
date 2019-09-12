@@ -42,9 +42,10 @@ MakeRODHydroYear <- function(RODCat, hydYear){
   if(leap_year(hydYear)){
     outDF <- AddLeapYearDay(outDF)
   }
+  outDF <- as_tibble(outDF)
+  outDF2 <- select(outDF, DoY,YMD, Q)
   
-  
-  return(outDF)
+  return(outDF2)
 }
 
 

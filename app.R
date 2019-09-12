@@ -66,7 +66,14 @@ ui <- fluidPage(
                   value = 1920,
                   sep = ""),
       checkboxInput("ShowCenterofMass", "Display Center of Mass", FALSE) ,
-      checkboxInput("ShowBaseflow", "Display Baseflow", FALSE)    #,
+      checkboxInput("ShowBaseflow", "Display Baseflow", FALSE)    ,
+      radioButtons("rodHY", "ROD Flow Year:",
+                   c("Ex. Wet" = "ex.wet",
+                     "Wet" = "wet",
+                     "Normal" = "norm",
+                     "Dry" = "dry",
+                     "Crit. Dry" = "crit.dry")),
+      checkboxInput("RODhydr", "Show ROD Hydrograph", FALSE)    #,
       #verbatimTextOutput("value")
     ),
     
@@ -101,6 +108,11 @@ server <- function(input, output) {
                                  linetype = "dashed",
                                  color = "blue"
       )
+    }
+    if( input$RODhydr ){
+      #  0. Create ROD HY
+      #  1.  Add to plot
+
     }
     plot(plotH)
     # draw the histogram with the specified number of bins
