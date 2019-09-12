@@ -73,7 +73,7 @@ ui <- fluidPage(
                      "Normal" = "norm",
                      "Dry" = "dry",
                      "Crit. Dry" = "crit.dry")),
-      checkboxInput("RODhydr", "Show ROD Hydrograph", FALSE)    #,
+      checkboxInput("boolRODHydr", "Show ROD Hydrograph", FALSE)    #,
       #verbatimTextOutput("value")
     ),
     
@@ -87,14 +87,28 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-
+  
   output$distPlot <- renderPlot({
-
-    startDate <- as.integer(input$singleHY)
+    # 0 . prep the integer date
+    thisHY <- as.integer(input$singleHY)   # int HY
+    startDate <- thisHY - 1  
+    iStartYear <- startDate  # integer start Year
+    # 1. startDate is now YMD of day one of HY
     startDate <- ymd(p(as.character(startDate),"-10-01"))
-    #endDate <- ymd(p(as.character(startDate+1),"-10-01"))
+
+    # 2. render inDF of target HY
     endDate <- startDate + years(1)
-    inDF <- GetHydroDF(startDate, endDate)
+    inDF <- GetHydroDF(startDate, endDate - 1)    
+    
+    # 1. Fetch the select ROD Hydrograph
+    if(input$boolRODHydr){
+      RODhydrograph <- MakeRODHydroYear(input$rodHY, thisHY)
+      nm <- c("ROD_DoY", "ROD_YMD","ROD_Q")
+      names(RODhydrograph) <- nm
+      inDF <- bind_cols(inDF,RODhydrograph)
+    }
+    
+
     plotH <- plotHydrograph_HYYear(inDF)
     if( input$ShowCenterofMass ){
       centerDate <- CalculateCenterofMass(inDF)
@@ -109,10 +123,18 @@ server <- function(input, output) {
                                  color = "blue"
       )
     }
-    if( input$RODhydr ){
+    
+    
+    if( input$boolRODHydr ){
       #  0. Create ROD HY
       #  1.  Add to plot
-
+      RODhydrograph <- MakeRODHydroYear(input$rodHY, thisHY)
+      inDF$ROD_Q <- RODhydrograph
+      plotH <- plotH + geom_line(aes(x=YMD, y=ROD_Q),
+                                 linetype = "dashed",
+                                 color = "red"
+      )
+      
     }
     plot(plotH)
     # draw the histogram with the specified number of bins
