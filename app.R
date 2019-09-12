@@ -98,7 +98,6 @@ server <- function(input, output) {
     }
     if( input$ShowBaseflow ){
       plotH <- plotH + geom_line(aes(x=YMD, y=baseQ),
-                                 xintercept = as.double(centerDate),
                                  linetype = "dashed",
                                  color = "blue"
       )
