@@ -9,7 +9,7 @@
 
 library(shiny)
 library(lubridate)
-
+VERBOSE=TRUE
 #  Data Summary:
 
 # 1911-10-01 # HY12
@@ -68,12 +68,12 @@ ui <- fluidPage(
       checkboxInput("ShowCenterofMass", "Display Center of Mass", FALSE) ,
       checkboxInput("ShowBaseflow", "Display Baseflow", FALSE)    ,
       radioButtons("rodHY", "ROD Flow Year:",
-                   c("Ex. Wet" = "ex.wet",
-                     "Wet" = "wet",
-                     "Normal" = "norm",
-                     "Dry" = "dry",
-                     "Crit. Dry" = "crit.dry")),
-      checkboxInput("boolRODHydr", "Show ROD Hydrograph", FALSE)    #,
+                   c("Ex. Wet" = "Ex.Wet",
+                     "Wet" = "Wet",
+                     "Normal" = "Normal",
+                     "Dry" = "Dry",
+                     "Crit. Dry" = "Crit.Dry")),
+      checkboxInput("RODhydr", "Show ROD Hydrograph", FALSE)    #,
       #verbatimTextOutput("value")
     ),
     
@@ -87,28 +87,23 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-  
+
   output$distPlot <- renderPlot({
-    # 0 . prep the integer date
-    thisHY <- as.integer(input$singleHY)   # int HY
-    startDate <- thisHY - 1  
-    iStartYear <- startDate  # integer start Year
-    # 1. startDate is now YMD of day one of HY
-    startDate <- ymd(p(as.character(startDate),"-10-01"))
+    if( input$RODhydr){
+      if(VERBOSE){print(c(year(endDate),class(year(endDate))))}
+      #  0. Create ROD HY
+      #RODhydrograph <- MakeRODHydroYear(input$rodHY, as.integer(year(endDate)))
 
-    # 2. render inDF of target HY
-    endDate <- startDate + years(1)
-    inDF <- GetHydroDF(startDate, endDate - 1)    
-    
-    # 1. Fetch the select ROD Hydrograph
-    if(input$boolRODHydr){
-      RODhydrograph <- MakeRODHydroYear(input$rodHY, thisHY)
-      nm <- c("ROD_DoY", "ROD_YMD","ROD_Q")
-      names(RODhydrograph) <- nm
-      inDF <- bind_cols(inDF,RODhydrograph)
+      #print(c("dim of RODhydr", dim(RODhydrograph)))
+      print(c("dim of inDF", dim(inDF)))
+      
     }
-    
 
+    startDate <- as.integer(input$singleHY)
+    startDate <- ymd(p(as.character(startDate),"-10-01"))
+    #endDate <- ymd(p(as.character(startDate+1),"-10-01"))
+    endDate <- startDate + years(1)
+    inDF <- GetHydroDF(startDate, endDate)
     plotH <- plotHydrograph_HYYear(inDF)
     if( input$ShowCenterofMass ){
       centerDate <- CalculateCenterofMass(inDF)
@@ -123,17 +118,23 @@ server <- function(input, output) {
                                  color = "blue"
       )
     }
-    
-    if( input$boolRODHydr ){
-      #  0. Create ROD HY
-      #  1.  Add to plot
-      RODhydrograph <- MakeRODHydroYear(input$rodHY, thisHY)
-      inDF$ROD_Q <- RODhydrograph 
-      plotH <- plotH + geom_line(aes(x=YMD, y=RODhydrograph$Q),
-                                 linetype = "dashed",
-                                 color = "red"
-      )
+    if( input$RODhydr ){
+
       
+      nm <- c("ROD_DoY", "ROD_YMD","ROD_Q")
+      names(RODhydrograph) <- nm
+      if(VERBOSE){print(RODhydrograph)}
+        
+      inDF <- bind_cols(inDF,RODhydrograph)
+      if(VERBOSE){print(inDF)}
+      
+      #  1.  Add to plot
+      if(VERBOSE){print(dim(RODhydrograph))}
+      plotH <- plotH + geom_line(aes(x=YMD, y=ROD_Q),
+                                 linetype = "dashed",
+                                 color = "green"
+      )
+
     }
     plot(plotH)
     # draw the histogram with the specified number of bins
