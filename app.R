@@ -137,10 +137,7 @@ server <- function(input, output) {
     }
     
     if( input$boolRODHydr ){
-      #  0. Create ROD HY
       #  1.  Add to plot
-      #RODhydrograph <- MakeRODHydroYear(input$rodHY, thisHY)
-      #inDF$ROD_Q <- RODhydrograph 
       plotH <- plotH + geom_line(aes(x=YMD, y=ROD_Q),
                                  linetype = "dashed",
                                  color = "red"
