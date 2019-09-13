@@ -9,6 +9,7 @@
 
 library(shiny)
 library(lubridate)
+VERBOSE=TRUE
 
 #  Data Summary:
 
@@ -43,78 +44,57 @@ library(lubridate)
 
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(
-  
-  # Application title
-  titlePanel("Trinity River Q"),
-  
-  # Sidebar with a slider input for number of bins 
-  sidebarLayout(
-    sidebarPanel(
-      dateRangeInput("daterangeIn", "Date range:",
-                     start  = "2001-01-01",
-                     end    = "2010-12-31",
-                     min    = allQ.StartDate,
-                     max    = allQ.EndDate,
-                     format = "mm/dd/yy",
-                     separator = " - "),
-      actionButton("renderDateRange", "Plot Range"),
-      sliderInput("singleHY",
-                  "Hydrologic Year:",
-                  min = 1912,
-                  max = 2018,
-                  value = 1920,
-                  sep = ""),
-      checkboxInput("ShowCenterofMass", "Display Center of Mass", FALSE) ,
-      checkboxInput("ShowBaseflow", "Display Baseflow", FALSE)    ,
-      radioButtons("rodHY", "ROD Flow Year:",
-                   c("Ex. Wet" = "ex.wet",
-                     "Wet" = "wet",
-                     "Normal" = "norm",
-                     "Dry" = "dry",
-                     "Crit. Dry" = "crit.dry")),
-      checkboxInput("boolRODHydr", "Show ROD Hydrograph", FALSE)    #,
-      #verbatimTextOutput("value")
-    ),
-    
-    
-    # Show a plot of the generated distribution
-    mainPanel(
-      plotOutput("distPlot")
-    )
-  )
-)
 
 # Define server logic required to draw a histogram
+
+FixThatReactiveDT <- function(inReac){
+  outDF <- inReac[,c(1, 6, 3,2,4,5,8)]
+  names(outDF) <- c("Date", "DoY"," HY", "Q", "Baseflow", "Transient", "ROD Q"  )
+  return(outDF)
+}
+
+
 server <- function(input, output) {
   
-  output$distPlot <- renderPlot({
-    # 0 . prep the integer date
-    thisHY <- as.integer(input$singleHY)   # int HY
-    startDate <- thisHY - 1  
-    iStartYear <- startDate  # integer start Year
-    # 1. startDate is now YMD of day one of HY
-    startDate <- ymd(p(as.character(startDate),"-10-01"))
-
-    # 2. render inDF of target HY
-    endDate <- startDate + years(1)
-    inDF <- GetHydroDF(startDate, endDate - 1)    
-    
-    # 1. Fetch the select ROD Hydrograph
-    if(input$boolRODHydr){
+  reactDF <- reactive({
+    goodDF <- function(in1, in2){
+      # 0 . prep the integer date
+      thisHY <- as.integer(input$singleHY)   # int HY
+      startDate <- thisHY - 1  
+      iStartYear <- startDate  # integer start Year
+      # 1. startDate is now YMD of day one of HY
+      startDate <- ymd(p(as.character(startDate),"-10-01"))
+      
+      # 2. render inDF of target HY
+      endDate <- startDate + years(1)
+      inDF <- GetHydroDF(startDate, endDate - 1)    
+      
+      # 1. Fetch the select ROD Hydrograph
+      
       RODhydrograph <- MakeRODHydroYear(input$rodHY, thisHY)
       nm <- c("ROD_DoY", "ROD_YMD","ROD_Q")
       names(RODhydrograph) <- nm
       inDF <- bind_cols(inDF,RODhydrograph)
+      if(VERBOSE){inDF$RODtype<-input$rodHY}
+      return(inDF)
     }
+    goodDF(input$rodHY,input$singleHY)
+  })
+  
+  output$tableOut <- renderDataTable(FixThatReactiveDT(reactDF()),
+                                     options = list(pageLength = 10)
+  )  
+  
+  output$distPlot <- renderPlot({
     
-
+    
+    inDF <- reactDF()
     plotH <- plotHydrograph_HYYear(inDF)
     if( input$ShowCenterofMass ){
       centerDate <- CalculateCenterofMass(inDF)
       plotH <- plotH + geom_vline(xintercept = as.double(centerDate),
                                   linetype = "dashed",
-                                  color = "red"
+                                  color = "green"
       )
     }
     if( input$ShowBaseflow ){
@@ -125,11 +105,8 @@ server <- function(input, output) {
     }
     
     if( input$boolRODHydr ){
-      #  0. Create ROD HY
       #  1.  Add to plot
-      RODhydrograph <- MakeRODHydroYear(input$rodHY, thisHY)
-      inDF$ROD_Q <- RODhydrograph 
-      plotH <- plotH + geom_line(aes(x=YMD, y=RODhydrograph$Q),
+      plotH <- plotH + geom_line(aes(x=YMD, y=ROD_Q),
                                  linetype = "dashed",
                                  color = "red"
       )
