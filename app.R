@@ -44,50 +44,16 @@ VERBOSE=TRUE
 
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(
-  
-  # Application title
-  titlePanel("Trinity River Q"),
-  
-  # Sidebar with a slider input for number of bins 
-  sidebarLayout(
-    sidebarPanel(
-      dateRangeInput("daterangeIn", "Date range:",
-                     start  = "2001-01-01",
-                     end    = "2010-12-31",
-                     min    = allQ.StartDate,
-                     max    = allQ.EndDate,
-                     format = "mm/dd/yy",
-                     separator = " - "),
-      actionButton("renderDateRange", "Plot Range"),
-      sliderInput("singleHY",
-                  "Hydrologic Year:",
-                  min = 1912,
-                  max = 2018,
-                  value = 1920,
-                  sep = ""),
-      checkboxInput("ShowCenterofMass", "Display Center of Mass", FALSE) ,
-      checkboxInput("ShowBaseflow", "Display Baseflow", FALSE)    ,
-      radioButtons("rodHY", "ROD Flow Year:",
-                   c("Ex. Wet" = "Ex.Wet",
-                     "Wet" = "Wet",
-                     "Normal" = "Norm",
-                     "Dry" = "Dry",
-                     "Crit. Dry" = "Crit.Dry")),
-      checkboxInput("boolRODHydr", "Show ROD Hydrograph", FALSE)    #,
-      #verbatimTextOutput("value")
-    ),
-    
-    
-    # Show a plot of the generated distribution
-    mainPanel(
-      plotOutput("distPlot")
-      #dataTableOutput("tableOut")
-    )
-  )
-)
 
 # Define server logic required to draw a histogram
+
+FixThatReactiveDT <- function(inReac){
+  outDF <- inReac[,c(1, 6, 3,2,4,5,8)]
+  names(outDF) <- c("Date", "DoY"," HY", "Q", "Baseflow", "Transient", "ROD Q"  )
+  return(outDF)
+}
+
+
 server <- function(input, output) {
   
   reactDF <- reactive({
@@ -115,7 +81,9 @@ server <- function(input, output) {
     goodDF(input$rodHY,input$singleHY)
   })
   
-  #output$tableOut <- renderDataTable(reactDF())
+  output$tableOut <- renderDataTable(FixThatReactiveDT(reactDF()),
+                                     options = list(pageLength = 10)
+                                     )  
   
   output$distPlot <- renderPlot({
  
@@ -126,7 +94,7 @@ server <- function(input, output) {
       centerDate <- CalculateCenterofMass(inDF)
       plotH <- plotH + geom_vline(xintercept = as.double(centerDate),
                                   linetype = "dashed",
-                                  color = "red"
+                                  color = "green"
       )
     }
     if( input$ShowBaseflow ){
