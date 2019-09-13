@@ -1,3 +1,4 @@
+library(rhandsontable)
 ui <- fluidPage(
   
   # Application title
@@ -40,7 +41,12 @@ ui <- fluidPage(
       tabsetPanel(type="tabs",
             tabPanel("Plot", plotOutput("distPlot")),
             tabPanel("Table", dataTableOutput("tableOut")),
-            tabPanel("Input Hydrograph", rHandsontableOutput("hot") )
+            tabPanel("Input Hydrograph", 
+                     textInput("Hydrograph Name", "thisHyName", 
+                               value = "myHydrograph", width = NULL,
+                               placeholder = NULL),
+                     actionButton("launchEditor","Launch Editor"),
+                     rHandsontableOutput("hot") )
         
       )
       #plotOutput("distPlot")
