@@ -39,7 +39,8 @@ ui <- fluidPage(
       #  Tabset Output
       tabsetPanel(type="tabs",
             tabPanel("Plot", plotOutput("distPlot")),
-            tabPanel("Table", dataTableOutput("tableOut"))
+            tabPanel("Table", dataTableOutput("tableOut")),
+            tabPanel("Input Hydrograph", rHandsontableOutput("hot") )
         
       )
       #plotOutput("distPlot")

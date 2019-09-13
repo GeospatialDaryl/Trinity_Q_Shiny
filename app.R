@@ -83,10 +83,10 @@ server <- function(input, output) {
   
   output$tableOut <- renderDataTable(FixThatReactiveDT(reactDF()),
                                      options = list(pageLength = 10)
-                                     )  
+  )  
   
   output$distPlot <- renderPlot({
- 
+    
     
     inDF <- reactDF()
     plotH <- plotHydrograph_HYYear(inDF)
