@@ -30,3 +30,31 @@ CalculateCenterofMass <- function(inHYDF){
   outDay <- inDay + days(as.integer(round(R))) 
   return(outDay)
 }
+
+# https://stat.ethz.ch/R-manual/R-devel/library/stats/html/ecdf.html
+#-- Simple didactical  ecdf  example :
+#x <- rnorm(12)
+
+predamECDF <- ecdf(yrlyQ)
+
+# Fn <- ecdf(x)
+# Fn     # a *function*
+# Fn(x)  # returns the percentiles for x
+# tt <- seq(-2, 2, by = 0.1)
+# 12 * Fn(tt) # Fn is a 'simple' function {with values k/12}
+# summary(Fn)
+# ##--> see below for graphics
+# knots(Fn)  # the unique data values {12 of them if there were no ties}
+# 
+# y <- round(rnorm(12), 1); y[3] <- y[1]
+# Fn12 <- ecdf(y)
+# Fn12
+# knots(Fn12) # unique values (always less than 12!)
+# summary(Fn12)
+# summary.stepfun(Fn12)
+# 
+# ## Advanced: What's inside the function closure?
+# ls(environment(Fn12))
+# ## "f"     "method" "na.rm"  "nobs"   "x"     "y"    "yleft"  "yright"
+# utils::ls.str(environment(Fn12))
+# stopifnot(all.equal(quantile(Fn12), quantile(y)))

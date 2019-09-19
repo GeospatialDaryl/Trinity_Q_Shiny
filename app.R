@@ -61,8 +61,10 @@ FixThatReactiveDT <- function(inReac){
 MakeEmptyHydrographDF <- function(){
   thisDF <- data.frame(YMD=as.Date(character()),
                        Q=double(),
-                       
+                       Note = character(),
+                       stringsAsFactors = FALSE
                        )
+  return(thisDF)
 }
 
 
@@ -96,7 +98,8 @@ server <- function(input, output) {
   })
   
   observeEvent(input$launchEditor,{
-    
+    thisHydrograph <- MakeEmptyHydrographDF()
+    editTable(thisHydrograph)
   })
   
   output$tableOut <- renderDataTable(FixThatReactiveDT(reactDF()),

@@ -1,0 +1,74 @@
+---
+title: "Peak Detection"
+output: html_notebook
+---
+
+
+```{r}
+filter(tAllQ, HY == "1912") -> tHY1912
+summary(tHY1912)
+```
+
+```{r}
+plot(tHY1912$YMD, tHY1912$tQ,"l" )
+```
+```{r}
+lenYr <- dim(tHY1912)[1]
+
+strideKernel <- function(inHYDF,DoY){
+  # three day symmetric stride
+  lenYr <- dim(inHYDF)
+  stride <- 3
+  startD <- inHYDF$YMD[1]
+  header <- inHYDF[0,]
+  footer <- inHYDF[0,]
+  for (i in seq(1:strid)){
+    
+  }
+  
+  return(outDF)
+}
+
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
