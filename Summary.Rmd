@@ -67,7 +67,7 @@ quantile(predamECDF, probs = seq(0,1,.05), names=TRUE)
 plot(qtile, seq(0,1,0.05))
 ```
 ```{r}
-qt <- ggplot(predamECDF, aes(x,y) + geom_point())
+#qt <- ggplot(predamECDF, aes(x,y) + geom_point())
 
 ```
 
