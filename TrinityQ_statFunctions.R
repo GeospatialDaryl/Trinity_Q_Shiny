@@ -37,32 +37,12 @@ CalculateCenterofMass <- function(inHYDF){
 #-- Simple didactical  ecdf  example :
 #x <- rnorm(12)
 
-predamECDF <- ecdf(yrlyQ)
-
-# Fn <- ecdf(x)
-# Fn     # a *function*
-# Fn(x)  # returns the percentiles for x
-# tt <- seq(-2, 2, by = 0.1)
-# 12 * Fn(tt) # Fn is a 'simple' function {with values k/12}
-# summary(Fn)
-# ##--> see below for graphics
-# knots(Fn)  # the unique data values {12 of them if there were no ties}
-# 
-# y <- round(rnorm(12), 1); y[3] <- y[1]
-# Fn12 <- ecdf(y)
-# Fn12
-# knots(Fn12) # unique values (always less than 12!)
-# summary(Fn12)
-# summary.stepfun(Fn12)
-# 
-# ## Advanced: What's inside the function closure?
-# ls(environment(Fn12))
-# ## "f"     "method" "na.rm"  "nobs"   "x"     "y"    "yleft"  "yright"
-# utils::ls.str(environment(Fn12))
-# stopifnot(all.equal(quantile(Fn12), quantile(y)))
+#predamECDF <- ecdf(yrlyQ)
 
 
-mountainClimber <- function(inHYDF, DoY){
+
+
+mountainClimber <- function(inHYDF, DoY, metric="Q"){
   lenYr <- dim(inHYDF)[1]
   #k <- DoY   # k is DoY
   j <- 0
@@ -70,7 +50,7 @@ mountainClimber <- function(inHYDF, DoY){
   
   # start at arbitrary point
   while(j < 1){
-    outPut <- pickSteeper(inHYDF, DoY)
+    outPut <- pickSteeper(inHYDF, DoY, metric)
     #print(c("iter",i,outPut))
     DoY <- outPut[1]
     if(as.logical(outPut[3]) == TRUE){ break }
@@ -86,7 +66,31 @@ fixNA <- function(inNum){
   return(outNum)
 }
 
-pickSteeper <- function(inHYDF,DoY){
+pickSteeper <- function(inHYDF,DoY,metric="Q"){
+  metricCol <- which( names(inHYDF)==metric )
+  thisVal <- inHYDF[[DoY,metricCol]]
+  rightVal <- inHYDF[[DoY+1,metricCol]]
+  leftVal <- inHYDF[[DoY-1,metricCol]]
+  #thisVal <- inHYDF$tQ[DoY]
+  #rightVal <- inHYDF$tQ[DoY+1]
+  #leftVal <- inHYDF$tQ[DoY-1]  #    day, flow, condition
+  if(metric=="tQ"){
+    thisVal <- fixNA(thisVal)
+    leftVal <- fixNA(leftVal)
+    rightVal <- fixNA(rightVal)
+  }
+  #print(c(leftVal, thisVal,rightVal))
+  if ( rightVal > thisVal){
+    outie <- c(DoY+1, rightVal, FALSE) 
+  }
+  if(rightVal > thisVal){
+    outie <- c(DoY+1, rightVal, FALSE) }
+  else if (leftVal > thisVal){outie <- c(DoY-1, leftVal, FALSE) }
+  else { outie <- c(DoY, thisVal, TRUE)}
+  return(outie)
+}
+
+pickSteeper2 <- function(inHYDF,DoY){
   delta <- 0.01
   thisVal <- inHYDF$tQ[DoY]
   rightVal <- inHYDF$tQ[DoY+1]
@@ -161,8 +165,6 @@ PlotHYwPeaks <- function(inHYDF, inPeaksDF){
     aber(inPeaksDF$PeakDay[i])
   }
 }
-peaks1912 <- PeakDetector(HY1912)
-PlotHYwPeaks(HY1912, peaks1912)
 
 ReCutAllHYs <- function(){
   filter(tAllQ, (YMD>=ymd("1911-10-01") & YMD <=ymd("1912-09-30"))) -> HY1912
