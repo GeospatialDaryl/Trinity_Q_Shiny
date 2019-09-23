@@ -9,6 +9,10 @@
 
 library(shiny)
 library(lubridate)
+library(tibble)
+library(dplyr)
+library(ggplot2)
+library(rhandsontable)
 VERBOSE=TRUE
 
 #  Data Summary:
@@ -47,12 +51,24 @@ VERBOSE=TRUE
 
 # Define server logic required to draw a histogram
 
+####  CORE FUNCTIONS  ######
 FixThatReactiveDT <- function(inReac){
   outDF <- inReac[,c(1, 6, 3,2,4,5,8)]
   names(outDF) <- c("Date", "DoY"," HY", "Q", "Baseflow", "Transient", "ROD Q"  )
   return(outDF)
 }
 
+MakeEmptyHydrographDF <- function(){
+  thisDF <- data.frame(YMD=as.Date(character()),
+                       Q=double(),
+                       Note = character(),
+                       stringsAsFactors = FALSE
+                       )
+  return(thisDF)
+}
+
+
+#####   CORE SERVER   #########
 
 server <- function(input, output) {
   
@@ -79,6 +95,11 @@ server <- function(input, output) {
       return(inDF)
     }
     goodDF(input$rodHY,input$singleHY)
+  })
+  
+  observeEvent(input$launchEditor,{
+    thisHydrograph <- MakeEmptyHydrographDF()
+    editTable(thisHydrograph)
   })
   
   output$tableOut <- renderDataTable(FixThatReactiveDT(reactDF()),

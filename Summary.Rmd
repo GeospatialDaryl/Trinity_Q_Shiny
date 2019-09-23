@@ -1,0 +1,131 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# Summary Statistics for the Trinity River
+
+
+```{r}
+# summaryHY
+as_tibble(summaryHY) -> tSummaryHY
+#
+```
+
+The Trinity River Dam was started in 1956, and the River diverted around the dam site on 1957-07-08.  Period of record for our USGS daily discharges at Lewiston is:
+```{r}
+histQ.StartDate
+```
+We segment the flow record into two componets, pre- and post-dam.
+```{r}
+# Pre Dam
+YMDbeginDam <- ymd("1959-10-01")
+tPreDamQ <- filter(tAllQ, YMD < YMDbeginDam )
+tPreDamSummary <- filter(tSummaryHY, WYStart < YMDbeginDam )
+names(tPreDamSummary)
+```
+```{r}
+names(tPreDamQ)
+```
+Let us plot total discharge for each year, pre-dam:
+```{r}
+plot(tPreDamSummary$HY, tPreDamSummary$totalQ)
+```
+```{r}
+yrlyQ <- tPreDamSummary$totalQ
+yrlyQ <- yrlyQ[order(yrlyQ)]
+
+plot(yrlyQ)
+```
+https://stat.ethz.ch/R-manual/R-devel/library/stats/html/ecdf.html
+
+```{r}
+qqnorm(yrlyQ)
+#qqline(yrlyQ)
+```
+```{r}
+# make function for ecdf
+predamECDF <- ecdf(yrlyQ)
+maxHistQ <- max(yrlyQ)
+minHistQ <- min(yrlyQ)
+summary(yrlyQ)
+
+```
+```{r}
+summary.stepfun(predamECDF)
+```
+
+```{r}
+plot(predamECDF, verticals=TRUE, do.points=FALSE)
+```
+```{r}
+
+qtile <- quantile(predamECDF, probs = seq(0,1,.05), names=TRUE)
+quantile(predamECDF, probs = seq(0,1,.05), names=TRUE)
+```
+```{r}
+plot(qtile, seq(0,1,0.05))
+```
+```{r}
+#qt <- ggplot(predamECDF, aes(x,y) + geom_point())
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
