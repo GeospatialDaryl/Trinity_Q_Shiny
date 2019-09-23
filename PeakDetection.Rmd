@@ -29,28 +29,6 @@ strideKernel <- function(inHYDF,DoY){
   return(outDF)
 }
 
-mountainClimber <- function(inHYDF, DoY){
-  lenYr <- dim(inHYDF)[1]
-  k <- DoY
-  # start at arbitrary point
-  while(k > 0){
-    outPut <- pickSteeper(inHYDF, k)
-    k <- outPut[1]
-    DoY <- k
-    print(outPut)
-  }
-  return(DoY)
-}
-
-pickSteeper <- function(inHYDF,DoY){
-  thisVal <- inHYDF$Q[DoY]
-  rightVal <- inHYDF$Q[DoY+1]
-  leftVal <- inHYDF$Q[DoY-1]
-  if(rightVal > thisVal){return( c(DoY+1, rightVal) )}
-  else if (leftVal > thisVal){return( c(DoY-1, leftVal))}
-  else {return(c(0, thisVal))}
-}
-
 #mountainClimber(tHY1912, 20)
 set.seed(123)
 ```
