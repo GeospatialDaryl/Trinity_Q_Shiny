@@ -71,11 +71,42 @@ plot(qtile, seq(0,1,0.05))
 
 ```
 
+And Q by Year, with Classificaitons
+```{r}
+library(ggrepel)
+g <- ggplot(dHistWYClasses, aes(x=HY, y=Total_Volume))
+g <- g + geom_point(aes(col=YearType)) +
+#g <- g + geom_text(aes(label=HY)) +
+  #geom_label_repel(aes(label = HY),
+  #                box.padding   = 0.35, 
+  #                point.padding = 0.5,
+  #                segment.color = 'grey50')
+g
+```
 
 
+```{r}
+histECDF <- ecdf(dHistWYClasses$Total_Volume)
+plot(histECDF)
 
+```
 
+```{r}
+props <- seq(0,100)
+qs <- seq(0,100)
+dfHistCDF <- as.data.frame(cbind(props, qs), column.names=c("props", "qs"))
+for(i in seq(1,100)){
+  dfHistCDF$qs[i] <- quantile(histECDF, i/100.)
+}
+dfHistCDF$qs[101]<- max(dfHistCDF$qs)
+#plot(dfHistCDF$props,dfHistCDF$qs, "l")
+gpHistCDF <- ggplot(dfHistCDF,
+                    aes(props,qs)   )
+gpHistCDF <- gpHistCDF + geom_area()
+gpHistCDF <- gpHistCDF + geom_point()
 
+gpHistCDF
+```
 
 
 
