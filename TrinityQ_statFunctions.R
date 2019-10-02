@@ -52,6 +52,51 @@ seqAcross <- function(inDF){
   return(seq(1,lenDF) )
 }
 
+PeakDetector_gradAscent <- function(inHYDF, critPropWtQ = 0.02){
+  ######################
+  #   Params
+  #critPropWtQ <- 0.02
+  critPropWtQ <- critPropWtQ
+  #  FN this 
+  #  0 find maxima on table
+  inHYDF$PeakDay <- 0L
+  
+  for(i in seq(2,dim(inHYDF)[1]-1)){
+    inHYDF$PeakDay[i] <- mountainClimber(inHYDF, i)
+    #print(c(i,inHYDF$PeakDay[i]))
+  }
+  #  1 make counts, sort, threshhold
+  thisAHY <- count(inHYDF, PeakDay)
+  thisAHY$Q <- 0.
+  thisAHY <- arrange(thisAHY,desc(n))
+  
+  # clean thisAHY
+  thisAHY <- filter(thisAHY, PeakDay > 0)
+  #thisAHY <- filter(thisAHY, Q > 0)
+  thisAHY$propN <- (thisAHY$n/dim(thisAHY)[1]) 
+  #  2 populate Flows for days
+  
+  for(i in seq(1, dim(thisAHY)[1])){
+    #print(c(i,thisAHY$PeakDay[i]))
+    #if (i == 69){browser()}
+    thisAHY$Q[i] <- inHYDF$Q[thisAHY$PeakDay[i]]
+  }
+  thisAHY$WeightQ <- thisAHY$propN*thisAHY$Q
+  thisAHY <- arrange(thisAHY, desc(WeightQ))
+  #  3 with Weighted Qs, cum Prop
+  totalWeightQ <- sum(thisAHY$WeightQ)
+  thisAHY$propWtQ <- thisAHY$WeightQ/totalWeightQ
+  thisAHY <- arrange(thisAHY, desc(propWtQ))
+  
+  #maxQ <- max(inHYDF$Q)
+  # problem: figure out which top-n are important
+  # here we use 
+  #thisPeaks <- filter(thisAHY, thisAHY$propWtQ > critPropWtQ)
+  thisPeaks <- filter(thisAHY, thisAHY$propWtQ > 0.02)
+  return(thisPeaks)
+}
+
+
 
 PlotHYwPeaks <- function(inHYDF, inPeaksDF){
   inHYDF$DoY <- seqAcross(inHYDF)
