@@ -8,3 +8,7 @@
                  Both of these reads and cleans will be added to Import_and_Clean.r
         
  - 2019-09-23    Finally a readme, pulled all to branch master
+ 
+ - 2019-10-02   Set up for integrating peak detector - branch peakDetect 
+ 
+
