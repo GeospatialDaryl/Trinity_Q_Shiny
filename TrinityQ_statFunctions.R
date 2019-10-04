@@ -41,72 +41,10 @@ CalculateCenterofMass <- function(inHYDF){
 
 
 
-
-mountainClimber <- function(inHYDF, DoY, metric="Q"){
-  lenYr <- dim(inHYDF)[1]
-  #k <- DoY   # k is DoY
-  j <- 0
-  i <- 0
-  
-  # start at arbitrary point
-  while(j < 1){
-    outPut <- pickSteeper(inHYDF, DoY, metric)
-    #print(c("iter",i,outPut))
-    DoY <- outPut[1]
-    if(as.logical(outPut[3]) == TRUE){ break }
-    #print(outPut)
-    i <- i + 1
-  }
-  return(DoY)
-}
-
 fixNA <- function(inNum){
   if(is.na(inNum) ){outNum <- 0.}
   else{ outNum <- inNum}
   return(outNum)
-}
-
-pickSteeper <- function(inHYDF,DoY,metric="Q"){
-  metricCol <- which( names(inHYDF)==metric )
-  thisVal <- inHYDF[[DoY,metricCol]]
-  rightVal <- inHYDF[[DoY+1,metricCol]]
-  leftVal <- inHYDF[[DoY-1,metricCol]]
-  #thisVal <- inHYDF$tQ[DoY]
-  #rightVal <- inHYDF$tQ[DoY+1]
-  #leftVal <- inHYDF$tQ[DoY-1]  #    day, flow, condition
-  if(metric=="tQ"){
-    thisVal <- fixNA(thisVal)
-    leftVal <- fixNA(leftVal)
-    rightVal <- fixNA(rightVal)
-  }
-  #print(c(leftVal, thisVal,rightVal))
-  if ( rightVal > thisVal){
-    outie <- c(DoY+1, rightVal, FALSE) 
-  }
-  if(rightVal > thisVal){
-    outie <- c(DoY+1, rightVal, FALSE) }
-  else if (leftVal > thisVal){outie <- c(DoY-1, leftVal, FALSE) }
-  else { outie <- c(DoY, thisVal, TRUE)}
-  return(outie)
-}
-
-pickSteeper2 <- function(inHYDF,DoY){
-  delta <- 0.01
-  thisVal <- inHYDF$tQ[DoY]
-  rightVal <- inHYDF$tQ[DoY+1]
-  leftVal <- inHYDF$tQ[DoY-1]  #    day, flow, condition
-  thisVal <- fixNA(thisVal)
-  leftVal <- fixNA(leftVal)
-  rightVal <- fixNA(rightVal)
-  #print(c(leftVal, thisVal,rightVal))
-  if ( rightVal > thisVal){
-    outie <- c(DoY+1, rightVal, FALSE) 
-  }
-  if(rightVal > thisVal){
-    outie <- c(DoY+1, rightVal, FALSE) }
-  else if (leftVal > thisVal){outie <- c(DoY-1, leftVal, FALSE) }
-  else { outie <- c(DoY, thisVal, TRUE)}
-  return(outie)
 }
 
 seqAcross <- function(inDF){
@@ -114,7 +52,7 @@ seqAcross <- function(inDF){
   return(seq(1,lenDF) )
 }
 
-PeakDetector <- function(inHYDF, critPropWtQ = 0.02){
+PeakDetector_gradAscent <- function(inHYDF, critPropWtQ = 0.02){
   ######################
   #   Params
   #critPropWtQ <- 0.02
@@ -122,7 +60,7 @@ PeakDetector <- function(inHYDF, critPropWtQ = 0.02){
   #  FN this 
   #  0 find maxima on table
   inHYDF$PeakDay <- 0L
-
+  
   for(i in seq(2,dim(inHYDF)[1]-1)){
     inHYDF$PeakDay[i] <- mountainClimber(inHYDF, i)
     #print(c(i,inHYDF$PeakDay[i]))
@@ -157,6 +95,8 @@ PeakDetector <- function(inHYDF, critPropWtQ = 0.02){
   thisPeaks <- filter(thisAHY, thisAHY$propWtQ > 0.02)
   return(thisPeaks)
 }
+
+
 
 PlotHYwPeaks <- function(inHYDF, inPeaksDF){
   inHYDF$DoY <- seqAcross(inHYDF)
@@ -277,42 +217,6 @@ ReCutAllHYs <- function(){
 }
 
 
-
-
-# 
-# ######################
-# #   Params
-# critPropWtQ <- 0.02
-# #  FN this 
-# #  0 find maxima on table
-# for(i in seq(2,dim(tHY1912)[1]-1)){
-#   tHY1912[i,12] <- mountainClimber(tHY1912, i)
-# }
-# #  1 make counts, sort, threshhold
-# aHY1912 <- count(tHY1912, PeakDay)
-# aHY1912 <- arrange(aHY1912,desc(n))
-# aHY1912$propN <- (aHY1912$n/dim(aHY1912)[1]) 
-# #  2 populate Flows for days
-# 
-# for(i in seq(1, dim(aHY1912)[1])){
-#   aHY1912$Q[i] <- tHY1912$Q[aHY1912$PeakDay[i]]
-# }
-# aHY1912$WeightQ <- aHY1912$propN*aHY1912$Q
-# aHY1912 <- arrange(aHY1912, desc(WeightQ))
-# #  3 with Weighted Qs, cum Prop
-# totalWeightQ <- sum(aHY1912$WeightQ)
-# aHY1912$propWtQ <- aHY1912$WeightQ/totalWeightQ
-# aHY1912 <- arrange(aHY1912, desc(propWtQ))
-# 
-# #maxQ <- max(tHY1912$Q)
-# # problem: figure out which top-n are important
-# # here we use 
-# #thisPeaks <- filter(aHY1912, aHY1912$propWtQ > critPropWtQ)
-# thisPeaks <- filter(aHY1912, aHY1912$propWtQ > 0.02)
-# plot(tHY1912$DoY, tHY1912$Q, "l")
-# for(i in seq(1,dim(thisPeaks)[1])){
-#   aber(thisPeaks$PeakDay)
-# }
 
 # filter(tAllQ, (YMD>=ymd("1911-10-01") & YMD <=ymd("1912-09-30"))) -> HY1912
 # filter(tAllQ, (YMD>=ymd("1912-10-01") & YMD <=ymd("1913-09-30"))) -> HY1913
