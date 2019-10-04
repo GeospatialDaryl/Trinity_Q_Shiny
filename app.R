@@ -13,6 +13,7 @@ library(tibble)
 library(dplyr)
 library(ggplot2)
 library(rhandsontable)
+library(EcoHydRology)
 VERBOSE=TRUE
 
 #  Data Summary:
