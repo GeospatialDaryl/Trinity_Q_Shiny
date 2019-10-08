@@ -19,11 +19,15 @@ peakPicker_smooth <- function(inHYDF){
   par(new=F)
   
 }
+
 peakPicker <- function(inHYDF){
   yrLen <- dim(inHYDF)[1]
   mQ <- cbind(inHYDF$Q,inHYDF$Q)
+  trough <- 0.5*max(mQ[,1])
+  mQ <- mQ - trough
+  mQ[mQ<0] <- 0
   peakpick(mQ, 10,deriv.lim=0.01, peak.min.sd=.5, peak.npos=1L) -> peaks
-  peaks <- peaks[,2]
+  peaks <- peaks[,1]
   plot(inHYDF$YMD, peaks) 
   par(new=T)
   plot(inHYDF$YMD, inHYDF$Q, "l") 
