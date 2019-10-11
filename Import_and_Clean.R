@@ -26,3 +26,18 @@ names(histWYClasses) <- c("HY","Total_Volume","YearType")
 dHistWYClasses <- as.data.frame(histWYClasses)
 gHistWYClasses <- group_by(dHistWYClasses, YearType)
 
+#
+#   2.  Coffee Creek Gage - Daily
+#
+Trinity_CoffeeCreek_Import <- read_delim("tblInputs/Trinity_CoffeeCreek_Import.txt", 
+                                         +     "\t", escape_double = FALSE, col_types = cols(Date = col_date(format = "%Y-%m-%d"), 
+                                                                                             +         Q = col_double(), Site = col_integer()), 
+                                         +     trim_ws = TRUE)
+c("AGENCY","Site","YMD","CoffeeCreek.Q","Status") -> names(Trinity_CoffeeCreek_Import)
+CCk.Q <- Trinity_CoffeeCreek_Import[,c(3,4)]
+tAllQ2 <- full_join(tAllQ, CCk.Q, by="YMD")
+tAllQ <- tAllQ2
+
+
+
+

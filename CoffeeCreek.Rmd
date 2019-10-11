@@ -1,0 +1,95 @@
+---
+title: "Coffee Creek Flow Matching"
+author: "Daryl Van Dyke"
+output: html_notebook
+---
+This is a notebook that looks at the interaction of the discharge gage at Lewiston Dam and Coffee Creek tributatory to the Trinity River.  This pair provides the 'above and below' dam version of the flow records.
+
+The Coffee Creek UGSS gage station (site 11523200) started record on 1957-10-01 (HY1958) and overlaps from then on.  The first three years are pre-dam years, and as such, form the basis of determing lag and scaling parameters to estimate unimpaired flow.
+```{r}
+library(dplyr)
+library(ggplot2)
+```
+
+
+```{r}
+d1 <- ymd("1957-10-01")
+d2 <- ymd("1958-10-01")
+d3 <- ymd("1959-10-01")
+d4 <- ymd("1960-10-01")
+d5 <- ymd("1961-10-01")
+
+dHY58 <- GetHydroDF(d1, d2)
+dHY59 <- GetHydroDF(d2, d3)
+dHY60 <- GetHydroDF(d3, d4)
+dHY5860 <- GetHydroDF(d1, d4)
+
+Plot_tAllQ_FullFat(d1,d4, boolCCkHydr = TRUE)
+```
+The three years of overlape (HY58, HY59, and HY1960) present three different water year types defined by the Record of Decision:  Ex.Wet, Normal, and Dry, respectively.
+
+```{r}
+Plot_tAllQ_FullFat(d1,d2, boolCCkHydr = T)
+```
+```{r}
+Plot_tAllQ_FullFat(ymd("1959-02-15"), ymd("1959-03-01"), boolCCkHydr = T)
+```
+It looks like lag is about 1 day.
+```{r}
+Plot_tAllQ_FullFat(ymd("1959-02-15"), ymd("1959-02-21"), boolCCkHydr = T)
+```
+```{r}
+Plot_tAllQ_FullFat(ymd("1959-12-20"), ymd("1960-01-1"), boolCCkHydr = T)
+```
+One full day of lag again
+```{r}
+Plot_tAllQ_FullFat(ymd("1959-02-15"), ymd("1959-03-01"), boolCCkHydr = T)
+```
+```{r}
+dHY5860$YMD -> ymd5860
+ccq5860 <- dHY5860$CoffeeCreek.Q
+# coffee ck is 1 day ahead of lewiston
+ymd5860CCk <- ymd5860 + 1         #  slide dates forward 1 day
+ymd5860CCk <- as.data.frame(ymd5860CCk)
+ccq5860 <- as.data.frame(ccq5860)
+
+dlag <- as.data.frame(cbind(ymd5860CCk,ccq5860)) # make dlag
+delaggedQ <- as_tibble(dlag)
+rm(dlag)
+rm(ccq5860)
+rm(ymd5860)
+rm(ymd5860CCk)
+names(delaggedQ) <- c("YMD", "CCk.Q.delag.p1day")
+
+pLag <- qplot(delaggedQ$YMD,delaggedQ$CCk.Q.delag.p1day , geom="line" )
+
+plot(pLag)
+```
+
+```{r}
+p1 <- Plot_tAllQ_FullFat(ymd("1959-02-15"), ymd("1959-03-01"), boolCCkHydr = T)
+```
+
+```{r}
+stDate <- min(p1$data$YMD)
+enDate <- max(p1$data$YMD)
+
+delagSlice <- filter(delaggedQ, YMD >= stDate )
+delagSlice <- filter(delagSlice, YMD <= enDate )
+
+p2 <- p1 + geom_line( aes(delagSlice$YMD, delagSlice$CCk.Q.delag.p1day), color = "red"
+  )
+hLineY <- ymd("1959-02-17", origin = orig)
+p2 <- p2 + geom_vline(xintercept=hLineY , color = "blue") 
+plot(p2)
+```
+```{r}
+
+
+```
+
+
+
+
+
+

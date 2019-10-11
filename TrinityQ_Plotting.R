@@ -1,5 +1,9 @@
 library(ggplot2)
 library(lubridate)
+
+
+
+
 MakeYMDinHYDF <- function(inHYDF, hydYear){
   lenDF <- dim(inHYDF)[1]
   # make vector of dates
@@ -144,6 +148,67 @@ GetHydroDF<- function(dateStart, dateEnd){
     dplyr::filter(tAllQ, YMD < dateEnd + 1) -> in1
     dplyr::filter(in1,YMD > dateStart - 1) -> outDF
   return(outDF)
+}
+
+
+Plot_tAllQ_FullFat <- function(dateStart, dateEnd,
+                               boolBaseFlow = FALSE,
+                               boolCenterOfMass = FALSE,
+                               boolRODHydr = FALSE,
+                               boolCCkHydr = FALSE
+                               ){
+  
+  dplyr::filter(tAllQ, YMD < dateEnd + 1) -> in1
+  dplyr::filter(in1,YMD > dateStart - 1) -> inDF
+  rm(in1)
+  
+  plotH <- plotHydrograph_HYYear(inDF)
+  if( boolCenterOfMass ){
+    centerDate <- CalculateCenterofMass(inDF)
+    plotH <- plotH + geom_vline(xintercept = as.double(centerDate),
+                                linetype = "dashed",
+                                color = "green"
+    )
+  }
+  if( boolBaseFlow ){
+    plotH <- plotH + geom_line(aes(x=YMD, y=baseQ),
+                               linetype = "dashed",
+                               color = "blue"
+    )
+  }
+  
+  if( boolRODHydr ){
+    #  1.  Add to plot
+    plotH <- plotH + geom_line(aes(x=YMD, y=ROD_Q),
+                               linetype = "dashed",
+                               color = "red"
+    )
+    
+    # boolCCkHydr  
+  }
+  if( boolCCkHydr ){
+    #  1.  Add to plot
+    plotH <- plotH + geom_line(aes(x=YMD, y=CoffeeCreek.Q),
+                               linetype = "solid",
+                               color = "purple"
+    )
+  }
+  plot(plotH)
+  
+  
+}
+
+DF_tAllQ_FullFat <- function(dateStart, dateEnd,
+                               boolBaseFlow = FALSE,
+                               boolCenterOfMass = FALSE,
+                               boolRODHydr = FALSE,
+                               boolCCkHydr = FALSE
+){
+  
+  dplyr::filter(tAllQ, YMD < dateEnd + 1) -> in1
+  dplyr::filter(in1,YMD > dateStart - 1) -> inDF
+  rm(in1)
+  return(inDF)
 }
 
 

@@ -132,7 +132,17 @@ server <- function(input, output) {
                                  linetype = "dashed",
                                  color = "red"
       )
+    
+      # boolCCkHydr  
+    }
+    if( input$boolCCkHydr ){
+      #  1.  Add to plot
+      plotH <- plotH + geom_line(aes(x=YMD, y=CoffeeCreek.Q),
+                                 linetype = "solid",
+                                 color = "purple"
+      )
       
+      # boolCCkHydr  
     }
     plot(plotH)
     # draw the histogram with the specified number of bins
