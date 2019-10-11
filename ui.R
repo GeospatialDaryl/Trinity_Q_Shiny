@@ -29,7 +29,8 @@ ui <- fluidPage(
                      "Normal" = "Normal",
                      "Dry" = "Dry",
                      "Crit. Dry" = "Crit.Dry")),
-      checkboxInput("boolRODHydr", "Show ROD Hydrograph", FALSE)    #,
+      checkboxInput("boolRODHydr", "Show ROD Hydrograph", FALSE)    ,
+      checkboxInput("boolCCkHydr", "Show Coffee Creek Hydrograph", FALSE)    #,
       #verbatimTextOutput("value")
     ),
     
