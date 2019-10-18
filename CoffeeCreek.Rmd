@@ -181,9 +181,9 @@ Finally, let's look at loess smoothing for the predictor:
 #loggedQvQ <- as_tibble(cbind(log(tAllQSlice$Q),log(delaggedQ$CCk.Q.delag.p1day)))
 #names(loggedQvQ) <- c("logTriQ","logCCkQ")
 #llScaling <- lm(log(tAllQSlice$Q)~log(delaggedQ$CCk.Q.delag.p1day))
-loess10Scaling <- loess(loggedQvQ$logTriQ~loggedQvQ$logCCkQ, span = 0.10)
-loess25Scaling <- loess(loggedQvQ$logTriQ~loggedQvQ$logCCkQ, span = 0.25)
-loess50Scaling <- loess(loggedQvQ$logTriQ~loggedQvQ$logCCkQ, span = 0.50)
+loess10Scaling <- loess(loggedQvQ$logTriQ~loggedQvQ$logCCkQ, span = 0.10, se = TRUE)
+loess25Scaling <- loess(loggedQvQ$logTriQ~loggedQvQ$logCCkQ, span = 0.25, se = TRUE)
+loess50Scaling <- loess(loggedQvQ$logTriQ~loggedQvQ$logCCkQ, span = 0.50, se = TRUE)
 
 gloess <- ggplot(loggedQvQ,aes(x=loggedQvQ$logCCkQ,y=loggedQvQ$logTriQ ) ) +
   geom_jitter() +
@@ -215,20 +215,32 @@ Now set up <models>.predict
 
 # add 'fit', 'lwr', and 'upr' columns to dataframe
 loess10Scaling.predict <- cbind(loggedQvQ,predict(loess10Scaling,
-                                                  interval= "confidence") )
+                                                  interval= "predict") )
+
+loess10Scaling.predict$TriQ <- exp(loess10Scaling.predict$logTriQ)
+loess10Scaling.predict$CCkQ <- exp(loess10Scaling.predict$logCCkQ)
+l10pred <- loess10Scaling.predict
+l10pred$lwr <- l10pred[,3] - qt(0.975, loess10Scaling$df)*loess10Scaling$s
+
 
 loess25Scaling.predict <- cbind(loggedQvQ,predict(loess25Scaling,
                                                   interval= "confidence") )
 
+loess25Scaling.predict$TriQ <- exp(loess25Scaling.predict$logTriQ)
+loess25Scaling.predict$CCkQ <- exp(loess25Scaling.predict$logCCkQ)
+
 loess50Scaling.predict <- cbind(loggedQvQ,predict(loess50Scaling,
                                                   interval= "confidence") )
 
+loess50Scaling.predict$TriQ <- exp(loess50Scaling.predict$logTriQ)
+loess50Scaling.predict$CCkQ <- exp(loess50Scaling.predict$logCCkQ)
+
 # plot the points (actual observations), regression line, and confidence interval
-p <- ggplot(cars.predict, aes(speed,dist))
-p <- p + geom_point()
-p <- p + geom_line(aes(speed, fit))
-p <- p + geom_ribbon(aes(ymin=lwr,ymax=upr), alpha=0.3)
-p
+p10 <- ggplot(loess10Scaling.predict, aes(CCkQ, TriQ))
+p10 <- p10 + geom_point()
+p10 <- p10 + geom_line(aes(CCkQ, fit))
+p10 <- p10 + geom_ribbon(aes(ymin=lwr,ymax=upr), alpha=0.3)
+p10
 ```
 
 
