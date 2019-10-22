@@ -13,6 +13,7 @@ library(modelr)
 library(broom)
 library(tidyr)
 library(viridis)
+library(tidyr)
 ```
 
 
@@ -187,9 +188,13 @@ loess50Scaling <- loess(loggedQvQ$logTriQ~loggedQvQ$logCCkQ, span = 0.50, se = T
 
 gloess <- ggplot(loggedQvQ,aes(x=loggedQvQ$logCCkQ,y=loggedQvQ$logTriQ ) ) +
   geom_jitter() +
+  #geom_smooth( method = "lm", color = viridis(1, begin = .1)  , se = FALSE) +
+  #geom_smooth( method = "loess",    color = viridis(1, begin = 0.6), se = FALSE,
+  #             linetype = "dashed") 
   geom_smooth( method = "lm", color = viridis(1, begin = .1)  , se = FALSE) +
   geom_smooth( method = "loess",    color = viridis(1, begin = 0.6), se = FALSE,
-               linetype = "dashed") 
+               linetype = "dashed") +
+  theme(legend.position = "right")
 plot(gloess)
 
 ```
@@ -215,12 +220,13 @@ Now set up <models>.predict
 
 # add 'fit', 'lwr', and 'upr' columns to dataframe
 loess10Scaling.predict <- cbind(loggedQvQ,predict(loess10Scaling,
-                                                  interval= "predict") )
+                                                  interval= "confidence",
+                                                  level = 0.95) )
 
 loess10Scaling.predict$TriQ <- exp(loess10Scaling.predict$logTriQ)
 loess10Scaling.predict$CCkQ <- exp(loess10Scaling.predict$logCCkQ)
 l10pred <- loess10Scaling.predict
-l10pred$lwr <- l10pred[,3] - qt(0.975, loess10Scaling$df)*loess10Scaling$s
+#l10pred$lwr <- l10pred[,3] - qt(0.975, loess10Scaling$df)*loess10Scaling$se
 
 
 loess25Scaling.predict <- cbind(loggedQvQ,predict(loess25Scaling,
@@ -236,11 +242,96 @@ loess50Scaling.predict$TriQ <- exp(loess50Scaling.predict$logTriQ)
 loess50Scaling.predict$CCkQ <- exp(loess50Scaling.predict$logCCkQ)
 
 # plot the points (actual observations), regression line, and confidence interval
-p10 <- ggplot(loess10Scaling.predict, aes(CCkQ, TriQ))
-p10 <- p10 + geom_point()
-p10 <- p10 + geom_line(aes(CCkQ, fit))
-p10 <- p10 + geom_ribbon(aes(ymin=lwr,ymax=upr), alpha=0.3)
-p10
+#p10 <- ggplot(loess10Scaling.predict, aes(CCkQ, TriQ))
+#p10 <- p10 + geom_point()
+#p10 <- p10 + geom_line(aes(CCkQ, fit))
+#p10 <- p10 + geom_ribbon(aes(ymin=lwr,ymax=upr), alpha=0.3)
+#p10
+
+calcSSE <- function(x){
+  loessMod <- try(loess(loggedQvQ$logTriQ~loggedQvQ$logCCkQ, span=x), silent=F)
+  res <- try(loessMod$residuals, silent=T)
+  if(class(res)!="try-error"){
+    if((sum(res, na.rm=T) > 0)){
+      sse <- sum(res^2)  
+    }
+  }else{
+    sse <- 99999
+  }
+  return(sse)
+}
+optim(par=c(0.5), calcSSE, method="SANN")
+
+dfLoessResiduals <- data.frame(Span=character(),
+                               Residual=double())
+seqSpan <- seq(0.01,1,0.01)
+
+cbind(seqSpan,seqSpan) -> tblSpans
+dTblSpans <- as.data.frame(tblSpans)
+names(dTblSpans) <- c("span","residual")
+for(i in seq(1,100)){
+  loessMod <- loess(loggedQvQ$logTriQ~loggedQvQ$logCCkQ, span=dTblSpans[i,1])
+  dTblSpans[i,2] <- sum(abs(loessMod$residuals))
+}
+plot(dTblSpans)
+```
+```{r}
+plot(loggedQvQ$logTriQ,x=loggedQvQ$logCCkQ, type="p", main="Loess Smoothing and Prediction")
+lines(loess10Scaling.predict, x=loggedQvQ$logCCkQ, col="red")
+lines(loess25Scaling.predict, x=loggedQvQ$logCCkQ, col="green")
+lines(loess50Scaling.predict, x=loggedQvQ$logCCkQ, col="blue")
 ```
 
+Assemble predicted overlap for final comparison.
+
+```{r}
+predict( loess50Scaling,tAllQPred$logCCkQ) -> tAllQPred$logTriQ.Pred.Loess50
+predict( loess25Scaling,tAllQPred$logCCkQ) -> tAllQPred$logTriQ.Pred.Loess25
+predict( loess10Scaling,tAllQPred$logCCkQ) -> tAllQPred$logTriQ.Pred.Loess10
+
+tAllQPred$TriQ.Pred.Loess10 <- exp(tAllQPred$logTriQ.Pred.Loess10)
+tAllQPred$TriQ.Pred.Loess25 <- exp(tAllQPred$logTriQ.Pred.Loess25)
+tAllQPred$TriQ.Pred.Loess50 <- exp(tAllQPred$logTriQ.Pred.Loess50)
+
+
+comparePlot + geom_line( aes(tAllQPred$YMD, tAllQPred$TriQ.Pred.Loess10), color = "red" )-> comparePlot2
+
+comparePlot2
+```
+black is actual TriQ, Purple is actual Cck, red is Loess10 Prediction
+
+
+
+```{r}
+comparePlot2 + geom_line( aes(tAllQPred$YMD, tAllQPred$CCk.Q.xlScaler),
+                          color = "blue" ) +
+  xlim(d1,d2) + 
+  theme(legend.justification = "bottom") -> comparePlot3
+comparePlot3
+```
+The blue is basin scaline (~4.8), black is actual TriQ, Purple is actual Cck, red is Loess10 Prediction
+```{r}
+
+tAllQPred[, c(1,2,6,14,15,16,17)] -> reshapeTAllQPred
+
+reshapeTAllQPred[,c(1,2)] -> rshpTrinityQ
+reshapeTAllQPred[,c(1,3)] -> rshpCoffeeCkQ
+reshapeTAllQPred[,c(1,4)] -> rshpTriQ.Pred.Loess10
+reshapeTAllQPred[,c(1,5)] -> rshpTriQ.Pred.Loess25
+reshapeTAllQPred[,c(1,6)] -> rshpTriQ.Pred.Loess50
+reshapeTAllQPred[,c(1,7)] -> rshpTriQ.Pred.Linear
+
+rshpTrinityQ$model    <- "TrinityObs"
+rshpCoffeeCkQ$model   <- "CoffeeCkObs" 
+rshpTriQ.Pred.Loess10$model <- "TrinityPredLoess10"
+rshpTriQ.Pred.Loess25$model <- "TrinityPredLoess25"
+rshpTriQ.Pred.Loess50$model <- "TrinityPredLoess50"
+rshpTriQ.Pred.Linear$model   <- "TrinityPredLinear"
+
+
+
+compPlot <- ggplot(tAllQPred, aes(YMD, Q) )
+compPlot + geom_line() + geom_line()
+compPlot
+```
 
