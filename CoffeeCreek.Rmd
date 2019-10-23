@@ -364,6 +364,100 @@ So - we select loess 25.
 
 Loess is a terrible extrapolator.  
 
+So we evaluate the Loess curve - looks like our critical po8int is 7.25 (in log space) which is 1408 CFS.  This is the 94.1% flow for CoffeeCk PoR.
+
+This corresponds to the Trinity Q of 8.7 (log space) or 6000 CFS, 97.5% exceedance.
+
+Let's make a linear fit for extrapolation beyond 7.25.
+```{r}
+extrapLoggedQvQ <- filter(loggedQvQ, loggedQvQ$logCCkQ > 7.25)
+
+lmExtrap <- lm(loggedQvQ$logTriQ ~ loggedQvQ$logCCkQ)
+summary(lmExtrap)
+```
+```{r}
+plot(lmExtrap)
+```
+
+```{r}
+plot(extrapLoggedQvQ[,c(2,1)])
+abline(lm(loggedQvQ$logTriQ ~ loggedQvQ$logCCkQ))
+```
+Too high!  Let's find the crit point for 7.25
+
+
+```{r}
+y1 <- predict( loess25Scaling, 7.25)
+x1 <- 7.25
+x2 <- 9
+y2 <- predict( loess25Scaling, 9)
+m_loglog <- (y2 - y1)/(x2-x1)
+
+breakpointX1 <- 7.25
+maxpointX <- 11
+breakpointY1 <- y1
+maxpointY <- breakpointY1 + m_loglog*(maxpointX-breakpointX1)
+
+TrinityQ_from_CCk <- function(inQ_cfs){
+  isNA <- FALSE
+  if(is.na(inQ_cfs)){isNA <- TRUE}
+  logInQ <- log(inQ_cfs)
+  
+  if(isNA){
+    return(NA)
+  } else{
+  
+  if (logInQ > 7.25){
+    outNum <- breakpointY1 + m_loglog*(logInQ - breakpointX1)
+  } else {
+    outNum <- predict(loess25Scaling, logInQ )
+  }
+  return(exp(outNum))
+}}
+
+rshpTriQ <- tAllQ2[,c(1,2)]
+rshpTriQ$series <- "TriQ"
+names(rshpTriQ) <- c("YMD", "Q", "series")
+
+rshpCCk <- tAllQ2[,c(1,6)]
+rshpCCk$series <- "CCk"
+names(rshpCCk) <- c("YMD", "Q", "series")
+
+rshpTriQ.pred <- tAllQ2[,c(1,7)]
+rshpTriQ.pred$series <- "TriQ.pred"
+names(rshpTriQ.pred) <- c("YMD", "Q", "series")
+
+rshpTriCCkPredQ <- bind_rows(rshpTriQ, rshpCCk, rshpTriQ.pred)
+
+rshpTriCCkPredQ %>% group_by(series) %>%
+  ggplot(aes(YMD,Q, color = series)) -> compPlot
+compPlot + geom_line() + xlim(d1,d2)
+#compPlot <- ggplot(tAllQPred, aes(YMD, Q) )
+#compPlot + geom_line() + geom_line()
+compPlot + geom_line() + xlim(d1,d2)
+compPlot + geom_line() + xlim(d2,d3)
+compPlot + geom_line() + xlim(d3,d4)
+```
+
+```{r}
+compPlot + geom_line() + xlim(ymd("1958-10-01"),ymd("1959-09-30"))
+
+```
+OK - good to go.
+```{r}
+tAllQ$TriQ.pred <- tAllQ2$TriQ.pred
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
 

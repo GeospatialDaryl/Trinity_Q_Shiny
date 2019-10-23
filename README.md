@@ -10,5 +10,5 @@
  - 2019-09-23    Finally a readme, pulled all to branch master
  
  - 2019-10-02   Set up for integrating peak detector - branch peakDetect 
- 
+ - 2019-10-23   Finished basin scaling and Trinity unimpeded estimation
 
