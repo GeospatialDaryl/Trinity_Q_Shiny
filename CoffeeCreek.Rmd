@@ -345,9 +345,25 @@ rshpTAllQPred <- bind_rows(rshpTrinityQ, rshpCoffeeCkQ, rshpTriQ.Pred.Linear,
 
 rshpTAllQPred %>% group_by(model) %>%
   ggplot(aes(YMD,Q, color = model)) -> compPlot
-compPlot + geom_line()
+compPlot + geom_line() + xlim(d1,d2)
 #compPlot <- ggplot(tAllQPred, aes(YMD, Q) )
 #compPlot + geom_line() + geom_line()
-compPlot
+compPlot + geom_line() + xlim(d1,d2)
+compPlot + geom_line() + xlim(d2,d3)
+compPlot + geom_line() + xlim(d3,d4)
 ```
+Looking good-
+
+Let's evaluate a 2 week period:
+```{r}
+rshpTAllQPred %>% group_by(model) %>%
+   ggplot(aes(YMD,Q, color = model)) -> compPlot
+compPlot + geom_line() + xlim(ymd("1958-02-10"), ymd("1958-03-01"))
+```
+So - we select loess 25.
+
+Loess is a terrible extrapolator.  
+
+
+
 
