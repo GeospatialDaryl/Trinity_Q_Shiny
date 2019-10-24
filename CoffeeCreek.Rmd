@@ -81,6 +81,8 @@ p1 <- Plot_tAllQ_FullFat(ymd("1959-02-15"), ymd("1959-03-01"), boolCCkHydr = T)
 stDate <- min(p1$data$YMD)
 enDate <- max(p1$data$YMD)
 
+orig <- lubridate::origin
+
 delagSlice <- filter(delaggedQ, YMD >= stDate )
 delagSlice <- filter(delagSlice, YMD <= enDate )
 
@@ -260,7 +262,7 @@ calcSSE <- function(x){
   }
   return(sse)
 }
-optim(par=c(0.5), calcSSE, method="SANN")
+#optim(par=c(0.5), calcSSE, method="SANN")
 
 dfLoessResiduals <- data.frame(Span=character(),
                                Residual=double())
@@ -415,6 +417,16 @@ TrinityQ_from_CCk <- function(inQ_cfs){
   return(exp(outNum))
 }}
 
+tAllQ2 <- tAllQ
+
+lenTAllQ2 <- dim(tAllQ2)[1]
+i <- 1
+tAllQ2$TriQ.pred <- 0
+for(i in seq(1,lenTAllQ2)){
+  tAllQ2$TriQ.pred[i] <- TrinityQ_from_CCk(tAllQ2$CoffeeCreek.Q[i])  
+}
+
+
 rshpTriQ <- tAllQ2[,c(1,2)]
 rshpTriQ$series <- "TriQ"
 names(rshpTriQ) <- c("YMD", "Q", "series")
@@ -431,12 +443,15 @@ rshpTriCCkPredQ <- bind_rows(rshpTriQ, rshpCCk, rshpTriQ.pred)
 
 rshpTriCCkPredQ %>% group_by(series) %>%
   ggplot(aes(YMD,Q, color = series)) -> compPlot
-compPlot + geom_line() + xlim(d1,d2)
+
 #compPlot <- ggplot(tAllQPred, aes(YMD, Q) )
 #compPlot + geom_line() + geom_line()
 compPlot + geom_line() + xlim(d1,d2)
 compPlot + geom_line() + xlim(d2,d3)
 compPlot + geom_line() + xlim(d3,d4)
+compPlot + geom_line() + xlim(ymd("1960-01-20"),ymd("1960-02-10"))
+
+
 ```
 
 ```{r}
@@ -446,6 +461,7 @@ compPlot + geom_line() + xlim(ymd("1958-10-01"),ymd("1959-09-30"))
 OK - good to go.
 ```{r}
 tAllQ$TriQ.pred <- tAllQ2$TriQ.pred
+rm(tAllQ2)
 ```
 
 
