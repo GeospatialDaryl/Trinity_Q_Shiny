@@ -16,7 +16,7 @@ library(rhandsontable)
 library(EcoHydRology)
 VERBOSE=TRUE
 
-#  Data Summary:
+#####  Data Summary:  ####
 
 # 1911-10-01 # HY12
 #       `histQ` - tidy historic Trinity Q 
@@ -157,5 +157,6 @@ server <- function(input, output) {
   })
 }
 
-# Run the application 
+#####  Run the application ########
+
 shinyApp(ui = ui, server = server)
