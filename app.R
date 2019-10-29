@@ -149,7 +149,7 @@ server <- function(input, output) {
       #  1.  Add to plot
       plotH <- plotH + geom_line(aes(x=YMD, y=TriQ.pred),
                                  linetype = "solid",
-                                 color = "navy" )
+                                 color = "blue" )
                             }
     plot(plotH)
     # draw the histogram with the specified number of bins
