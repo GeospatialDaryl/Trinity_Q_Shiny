@@ -29,6 +29,8 @@ ui_win[["Controller"]] <- fluidPage(
 )
 
 # then we add what we want to see in the scatter section
-ui_win[["Hydrograph"]] <- fpHydro_v0
-
+ui_win[["Scatter"]] <- fluidPage(
+  titlePanel("Iris Dataset Explorer: Scatter"),
+  plotOutput(outputId = "iris_scatter")
+)
 

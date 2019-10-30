@@ -1,5 +1,11 @@
 library(rhandsontable)
-ui <- fluidPage(
+
+
+##### fluidPage - VersionZero   #####
+#  Original call - flat shiny
+#
+#ui <- fluidPage(
+fpVersionZero <- fluidPage(
   #theme
   #theme = "bootstrap.lumen.css",
   
@@ -43,18 +49,42 @@ ui <- fluidPage(
       
       #  Tabset Output
       tabsetPanel(type="tabs",
-            tabPanel("Plot", plotOutput("distPlot")),
-            tabPanel("Table", dataTableOutput("tableOut")),
-            tabPanel("Input Hydrograph", 
-                     textInput("Hydrograph Name", "thisHyName", 
-                               value = "myHydrograph", width = NULL,
-                               placeholder = NULL),
-                     actionButton("launchEditor","Launch Editor"),
-                     rHandsontableOutput("hot") )
-        
+                  tabPanel("Plot", plotOutput("distPlot")),
+                  tabPanel("Table", dataTableOutput("tableOut")),
+                  tabPanel("Input Hydrograph", 
+                           textInput("Hydrograph Name", "thisHyName", 
+                                     value = "myHydrograph", width = NULL,
+                                     placeholder = NULL),
+                           actionButton("launchEditor","Launch Editor"),
+                           rHandsontableOutput("hot") )
+                  
       )
       #plotOutput("distPlot")
       #dataTableOutput("tableOut")
     )
   )
 )
+
+
+
+##### fluidPage - only Hydrograph v0 #####
+fpHydro_v0 <- fluidPage(
+  #theme
+  #theme = "bootstrap.lumen.css",
+  
+  # Application title
+  titlePanel("Trinity River Q"),
+  
+
+    # Show a plot of the generated distribution
+    mainPanel(
+      
+      #  Tabset Output
+      tabsetPanel(type="tabs",
+                  tabPanel("Plot", plotOutput("distPlot")),
+                  tabPanel("Table", dataTableOutput("tableOut"))
+
+                  
+      )
+    )
+  )
