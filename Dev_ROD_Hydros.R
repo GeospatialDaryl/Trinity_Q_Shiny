@@ -591,5 +591,3 @@ rm(Crit.Dry_AllYrs, Dry_AllYrs, Normal_AllYrs, Wet_AllYrs, Ex.Wet_AllYrs)
 #####  Finals  #######
 summary(tRODHydros_AllYrs)    #  tabular RodHydros all Years
 summary(tidyAllQ_ROD)         #  tidy  RodHydros all years
-
-
