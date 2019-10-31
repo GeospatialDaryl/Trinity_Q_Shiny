@@ -11,6 +11,7 @@ The app leverages the [MWShiny package](https://cran.r-project.org/web/packages/
 
 
 ## Project Tracking
+ - 2019-10-31   Add explicit ROD WYs to `tAllQ`
 
  - 2019-10-30   Setting up for the refactor to MWShiny
 
