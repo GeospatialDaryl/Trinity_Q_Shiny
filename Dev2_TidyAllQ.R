@@ -30,3 +30,46 @@ tidyTri.Q[tidyTri.Q$HY == 1912,][367,]
 
 group_by(tidyTri.Q, HY) -> groupTidyTri.Q
 summarize(groupTidyTri.Q, yrsum = sum(Q)) -> tblYearlySums.Tri.Q
+
+convFctr_CFSD_to_AcreFeet <- (86400)/43559.935
+tblYearlySums.Tri.Q$yrsum_acrefeet <- tblYearlySums.Tri.Q$yrsum * convFctr_CFSD_to_AcreFeet
+
+classifyWY_contemporary <- function(inQ, units = "acrefeet"){
+  if(!units == "acrefeet"){
+    inQ <- inQ * convFctr_CFSD_to_AcreFeet
+  }
+  if(inQ < 369000){
+    return ("Crit.Dry")
+  } else if(inQ <= 453000){
+    return ("Dry") 
+  } else if(inQ <= 647000){
+    return ("Normal")
+  } else if(inQ <= 701000){
+    return ("Wet")
+  }  else {return ("Ex.Wet")}
+}
+
+classifyWY_historic <- function(inQ, units = "acrefeet"){
+  if(!units == "acrefeet"){
+    inQ <- inQ * convFctr_CFSD_to_AcreFeet
+  }
+  if(inQ < 650000){
+    return ("Crit.Dry")
+  } else if(inQ <= 1025000){
+    return ("Dry") 
+  } else if(inQ <= 1350000){
+    return ("Normal")
+  } else if(inQ <= 2000000){
+    return ("Wet")
+  }  else {return ("Ex.Wet")}
+}
+##### Now update table  ######
+tblYearlySums.Tri.Q$WYType <- ""
+  
+for(i in seq(1,49)){
+tblYearlySums.Tri.Q$WYType[i] <- classifyWY_historic(tblYearlySums.Tri.Q$yrsum_acrefeet[i])
+}
+
+for(i in seq(50,107)){
+  tblYearlySums.Tri.Q$WYType[i] <- classifyWY_contemporary(tblYearlySums.Tri.Q$yrsum_acrefeet[i])
+}
