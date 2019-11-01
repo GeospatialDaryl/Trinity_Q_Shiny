@@ -49,7 +49,7 @@ classifyWY_contemporary <- function(inQ, units = "acrefeet"){
   }  else {return ("Ex.Wet")}
 }
 
-classifyWY_historic <- function(inQ, units = "acrefeet"){
+classifyWY_historic2 <- function(inQ, units = "acrefeet"){
   if(!units == "acrefeet"){
     inQ <- inQ * convFctr_CFSD_to_AcreFeet
   }
@@ -63,6 +63,22 @@ classifyWY_historic <- function(inQ, units = "acrefeet"){
     return ("Wet")
   }  else {return ("Ex.Wet")}
 }
+
+classifyWY_historic <- function(inQ, units = "acrefeet"){
+  if(!units == "acrefeet"){
+    inQ <- inQ * convFctr_CFSD_to_AcreFeet
+  }
+  if(inQ >= 2000000){
+    return ("Ex.Wet")
+  } else if(inQ >= 1350000){
+    return ("Wet") 
+  } else if(inQ >= 1025000){
+    return ("Normal")
+  } else if(inQ >= 650000){
+    return ("Dry")
+  }  else {return ("Crit.Dry")}
+}
+
 ##### Now update table  ######
 tblYearlySums.Tri.Q$WYType <- ""
   
@@ -70,6 +86,64 @@ for(i in seq(1,49)){
 tblYearlySums.Tri.Q$WYType[i] <- classifyWY_historic(tblYearlySums.Tri.Q$yrsum_acrefeet[i])
 }
 
-for(i in seq(50,107)){
-  tblYearlySums.Tri.Q$WYType[i] <- classifyWY_contemporary(tblYearlySums.Tri.Q$yrsum_acrefeet[i])
-}
+#for(i in seq(50,107)){
+#  tblYearlySums.Tri.Q$WYType[i] <- classifyWY_contemporary(tblYearlySums.Tri.Q$yrsum_acrefeet[i])
+#}
+
+
+##### Actual WYTypes   #####
+tblYearlySums.Tri.Q$WYType[90] <- "Dry"
+tblYearlySums.Tri.Q$WYType[91] <- "Normal"
+tblYearlySums.Tri.Q$WYType[92] <- "Wet"
+tblYearlySums.Tri.Q$WYType[93] <- "Wet"
+tblYearlySums.Tri.Q$WYType[94] <- "Wet"
+tblYearlySums.Tri.Q$WYType[95] <- "Ex.Wet"
+tblYearlySums.Tri.Q$WYType[96] <- "Dry"
+tblYearlySums.Tri.Q$WYType[97] <- "Dry"
+tblYearlySums.Tri.Q$WYType[98] <- "Dry"
+tblYearlySums.Tri.Q$WYType[99] <- "Wet"
+tblYearlySums.Tri.Q$WYType[100] <- "Wet"
+tblYearlySums.Tri.Q$WYType[101] <- "Normal"
+tblYearlySums.Tri.Q$WYType[102] <- "Dry"
+tblYearlySums.Tri.Q$WYType[103] <- "Crit.Dry"
+tblYearlySums.Tri.Q$WYType[104] <- "Dry"
+tblYearlySums.Tri.Q$WYType[105] <- "Wet"
+tblYearlySums.Tri.Q$WYType[106] <- "Ex.Wet"
+tblYearlySums.Tri.Q$WYType[107] <- "Crit.Dry"
+
+#####  Forecast WYTypes  ##########
+tblYearlySums.Tri.Q$WYType[90]	<-	"Dry"
+tblYearlySums.Tri.Q$WYType[91]	<-	"Normal"
+tblYearlySums.Tri.Q$WYType[92]	<-	"Wet"
+tblYearlySums.Tri.Q$WYType[93]	<-	"Wet"
+tblYearlySums.Tri.Q$WYType[94]	<-	"Normal"
+tblYearlySums.Tri.Q$WYType[95]	<-	"Ext Wet"
+tblYearlySums.Tri.Q$WYType[96]	<-	"Dry"
+tblYearlySums.Tri.Q$WYType[97]	<-	"Normal"
+tblYearlySums.Tri.Q$WYType[98]	<-	"Dry"
+tblYearlySums.Tri.Q$WYType[99]	<-	"Normal"
+tblYearlySums.Tri.Q$WYType[100]	<-	"Wet"
+tblYearlySums.Tri.Q$WYType[101]	<-	"Normal"
+tblYearlySums.Tri.Q$WYType[102]	<-	"Dry"
+tblYearlySums.Tri.Q$WYType[103]	<-	"Crit.Dry"
+tblYearlySums.Tri.Q$WYType[104]	<-	"Dry"
+tblYearlySums.Tri.Q$WYType[105]	<-	"Wet"
+tblYearlySums.Tri.Q$WYType[106]	<-	"Ex.Wet"
+tblYearlySums.Tri.Q$WYType[107]	<-	"Crit.Dry"
+
+
+
+tblYearlySums.Tri.Q$fWYType <- as.factor(tblYearlySums.Tri.Q$WYType)
+
+
+gContemp <- ggplot(tblYearlySums.Tri.Q[90:107,],aes(HY,
+                                                    yrsum_acrefeet,
+                                                    color = fWYType) )
+gContemp + geom_point()
+
+gContemp <- ggplot(tblYearlySums.Tri.Q[1:49,],aes(HY,
+                                                    yrsum_acrefeet,
+                                                    color = fWYType) )
+gContemp + geom_point()
+
+
